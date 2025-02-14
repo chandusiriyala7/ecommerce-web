@@ -58,7 +58,7 @@ const Login = () => {
 
     console.log("data login",data)
     console.log("Redux State:", useSelector(state => state));
-    console.log("User Details:", user);
+   
     
   return (
     <section id='login'>
