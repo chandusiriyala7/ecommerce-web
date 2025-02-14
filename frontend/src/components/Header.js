@@ -22,6 +22,7 @@ const Header = () => {
   const searchQuery = URLSearch.getAll("q")
   const [search,setSearch] = useState(searchQuery)
 
+
   const handleLogout = async() => {
     const fetchData = await fetch(SummaryApi.logout_user.url,{
       method : SummaryApi.logout_user.method,
@@ -35,6 +36,7 @@ const Header = () => {
       dispatch(setUserDetails(null))
       navigate("/")
     }
+    
 
     if(data.error){
       toast.error(data.message)
@@ -52,6 +54,8 @@ const Header = () => {
       navigate("/search")
     }
   }
+console.log("User Details:", user)  // Debugging user details
+
   return (
     <header className='h-16 shadow-md bg-white fixed w-full z-40'>
       <div className=' h-full container mx-auto flex items-center px-4 justify-between'>
