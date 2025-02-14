@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react'
-import { useDispatch } from 'react-redux';
 import loginIcons from '../assest/signin.gif'
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
@@ -7,7 +6,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import SummaryApi from '../common';
 import { toast } from 'react-toastify';
 import Context from '../context';
-import { setUserDetails } from '../store/userSlice';
 
 const Login = () => {
     const [showPassword,setShowPassword] = useState(false)
@@ -16,8 +14,6 @@ const Login = () => {
         password : ""
     })
     const navigate = useNavigate()
-    const dispatch = useDispatch();
-
     const { fetchUserDetails, fetchUserAddToCart } = useContext(Context)
 
     const handleOnChange = (e) =>{
@@ -45,10 +41,10 @@ const Login = () => {
         })
 
         const dataApi = await dataResponse.json()
-
+        console.log(dataApi)
         if(dataApi.success){
+            console.log(dataApi)
             toast.success(dataApi.message)
-            dispatch(setUserDetails(dataApi.user))
             navigate('/')
             fetchUserDetails()
             fetchUserAddToCart()
@@ -61,6 +57,8 @@ const Login = () => {
     }
 
     console.log("data login",data)
+    console.log("Redux State:", useSelector(state => state));
+    console.log("User Details:", user);
     
   return (
     <section id='login'>
