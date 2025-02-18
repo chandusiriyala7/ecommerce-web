@@ -6,7 +6,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import SummaryApi from '../common';
 import { toast } from 'react-toastify';
 import Context from '../context';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
+import { setUserDetails } from '../store/userSlice'; // Ensure correct path
 
 
 const Login = () => {
@@ -29,6 +30,7 @@ const Login = () => {
         })
     }
 
+    const dispatch = useDispatch();
 
     const handleSubmit = async(e) =>{
         e.preventDefault()
@@ -43,10 +45,12 @@ const Login = () => {
         })
 
         const dataApi = await dataResponse.json()
-        console.log(dataApi)
+   
         if(dataApi.success){
-            console.log(dataApi)
+          
             toast.success(dataApi.message)
+            // Dispatch user details to Redux
+            dispatch(setUserDetails(dataApi.user));  
             navigate('/')
             fetchUserDetails()
             fetchUserAddToCart()
@@ -59,7 +63,6 @@ const Login = () => {
     }
 
     console.log("data login",data)
-    console.log("Redux State:", useSelector(state => state));
    
     
   return (

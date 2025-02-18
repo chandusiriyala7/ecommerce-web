@@ -7,8 +7,14 @@ const router = require('./routes')
 
 
 const app = express()
+
+const FRONTEND_URL = process.env.NODE_ENV === "development" 
+    ? process.env.LOCAL_URL 
+    : process.env.FRONTEND_URL;
+
+
 app.use(cors({
-    origin : process.env.FRONTEND_URL,
+    origin : FRONTEND_URL,
     credentials : true
 }))
 app.use(express.json())

@@ -1,4 +1,7 @@
-const backendDomin = "https://ecommerce-web-4jpy.onrender.com"
+const backendDomin =
+  window.location.hostname === "localhost"
+    ? "http://localhost:8080"
+    : "https://ecommerce-web-4jpy.onrender.com";
 
 const SummaryApi = {
     signUP : {
