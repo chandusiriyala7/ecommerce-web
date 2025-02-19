@@ -6,8 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import SummaryApi from '../common';
 import { toast } from 'react-toastify';
 import Context from '../context';
-import { useDispatch, useSelector } from 'react-redux';
-import { setUserDetails } from '../store/userSlice'; // Ensure correct path
+import { useSelector } from "react-redux";
 
 
 const Login = () => {
