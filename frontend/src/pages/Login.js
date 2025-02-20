@@ -6,9 +6,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import SummaryApi from '../common';
 import { toast } from 'react-toastify';
 import Context from '../context';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
+import { setUserDetails } from '../store/userSlice'; // Ensure correct path
 
-
+ 
 const Login = () => {
     const [showPassword,setShowPassword] = useState(false)
     const [data,setData] = useState({
