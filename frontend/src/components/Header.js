@@ -61,13 +61,13 @@ console.log("User Details:", user)  // Debugging user details
       <div className=' h-full container mx-auto flex items-center px-4 justify-between'>
             <div className=''>
                 <Link to={"/"}>
-                     <h1><b> Printo logo :) </b></h1>
+                     <img src="./bullcroc-logo.jpg" alt ="bullcroc" className='w-[100px] '/>
                 </Link>
             </div>
 
             <div className='hidden lg:flex items-center w-full justify-between max-w-sm border rounded-full focus-within:shadow pl-2'>
                 <input type='text' placeholder='search product here...' className='w-full outline-none' onChange={handleSearch} value={search}/>
-                <div className='text-lg min-w-[50px] h-8 bg-red-600 flex items-center justify-center rounded-r-full text-white'>
+                <div className='text-lg min-w-[50px] h-8 bg-black  flex items-center justify-center rounded-r-full text-white'>
                   <GrSearch />
                 </div>
             </div>
@@ -114,7 +114,7 @@ console.log("User Details:", user)  // Debugging user details
                       <Link to={"/cart"} className='text-2xl relative'>
                           <span><FaShoppingCart/></span>
       
-                          <div className='bg-red-600 text-white w-5 h-5 rounded-full p-1 flex items-center justify-center absolute -top-2 -right-3'>
+                          <div className='bg-black  text-white w-5 h-5 rounded-full p-1 flex items-center justify-center absolute -top-2 -right-3'>
                               <p className='text-sm'>{context?.cartProductCount}</p>
                           </div>
                       </Link>
@@ -126,10 +126,10 @@ console.log("User Details:", user)  // Debugging user details
                 <div>
                   {
                     user?._id  ? (
-                      <button onClick={handleLogout} className='px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700'>Logout</button>
+                      <button onClick={handleLogout} className='px-3 py-1 rounded-full text-white bg-black hover:bg-gray-700'>Logout</button>
                     )
                     : (
-                    <Link to={"/login"} className='px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700'>Login</Link>
+                    <Link to={"/login"} className='px-3 py-1 rounded-full text-white bg-black hover:bg-gray-800'>Login</Link>
                     )
                   }
                     

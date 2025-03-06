@@ -82,10 +82,12 @@ const ProductDetails = () => {
   }
 
 
-  const handleAddToCart = async(e,id) =>{
-    await addToCart(e,id)
-    fetchUserAddToCart()
-  }
+  // In ProductDetails.js or CustomizationEditor.js
+const handleAddToCart = async (e, id) => {
+  const customizedImage = localStorage.getItem(`customizedImage_${id}`);
+  await addToCart(e, id, customizedImage); // Pass customized image to addToCart
+  fetchUserAddToCart(); // Refresh the cart
+};
 
   const handleBuyProduct = async(e,id)=>{
     await addToCart(e,id)
@@ -93,6 +95,8 @@ const ProductDetails = () => {
     navigate("/cart")
 
   }
+
+  
 
   return (
     <div className='container mx-auto p-4'>
@@ -204,9 +208,10 @@ const ProductDetails = () => {
                 </div>
 
                 <div className='flex items-center gap-3 my-2'>
-                  <button className='border-2 border-red-600 rounded px-3 py-1 min-w-[120px] text-red-600 font-medium hover:bg-red-600 hover:text-white' onClick={(e)=>handleBuyProduct(e,data?._id)}>Buy</button>
-                  <button className='border-2 border-red-600 rounded px-3 py-1 min-w-[120px] font-medium text-white bg-red-600 hover:text-red-600 hover:bg-white' onClick={(e)=>handleAddToCart(e,data?._id)}>Add To Cart</button>
-                </div>
+                  <button className='border-2 border-red-600 rounded px-3 py-1 min-w-[120px] text-red-600 font-medium hover:bg-gray-600 hover:text-white' onClick={(e)=>handleBuyProduct(e,data?._id)}>Buy</button>
+                  <button className='border-2 border-red-600 rounded px-3 py-1 min-w-[120px] font-medium text-white bg-black  hover:text-red-600 hover:bg-white' onClick={(e)=>handleAddToCart(e,data?._id)}>Add To Cart</button>
+                  <button className='border-2 border-blue-600 rounded px-3 py-1 min-w-[120px] font-medium text-white bg-blue-600 hover:bg-blue-700' onClick={() => navigate(`/customize/${data?._id}`)}>Customize</button>
+              </div>
 
                 <div>
                   <p className='text-slate-600 font-medium my-1'>Description : </p>
