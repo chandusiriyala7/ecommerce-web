@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
 import Masonry from 'react-masonry-css';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
