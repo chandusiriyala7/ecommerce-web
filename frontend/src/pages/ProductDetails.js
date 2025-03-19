@@ -36,11 +36,18 @@ const ProductDetails = () => {
 
   const fetchProductDetails = async()=>{
     setLoading(true)
+    const token = localStorage.getItem('authToken');  
+
+    if (!token) {
+        console.error("No auth token found");
+        return;
+    }
     const response = await fetch(SummaryApi.productDetails.url,{
       method : SummaryApi.productDetails.method,
-      headers : {
-        "content-type" : "application/json"
-      },
+      headers: {
+        'Authorization': `Bearer ${token}`,   // Send the token in Authorization header
+        'Content-Type': 'application/json'    // Specify content type
+    },
       body : JSON.stringify({
         productId : params?.id
       })

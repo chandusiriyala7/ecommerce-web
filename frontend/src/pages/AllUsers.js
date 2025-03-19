@@ -16,9 +16,19 @@ const AllUsers = () => {
     })
 
     const fetchAllUsers = async() =>{
+        const token = localStorage.getItem('authToken');  
+
+        if (!token) {
+            console.error("No auth token found");
+            return;
+        }
         const fetchData = await fetch(SummaryApi.allUser.url,{
             method : SummaryApi.allUser.method,
-            credentials : 'include'
+            credentials : 'include',
+            headers: {
+                'Authorization': `Bearer ${token}`,   // Send the token in Authorization header
+                'Content-Type': 'application/json'    // Specify content type
+            }
         })
 
         const dataResponse = await fetchData.json()

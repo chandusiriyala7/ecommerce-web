@@ -40,10 +40,8 @@ function App() {
 
         if (dataApi.success) {
             console.log(dataApi, 'log12');
-
-            navigate('/');
-            fetchUserDetails();        
-            fetchUserAddToCart();      
+            dispatch(setUserDetails(dataApi.data));
+             
         } else {
             toast.error(dataApi.message || "Failed to fetch user details");
         }
@@ -55,9 +53,19 @@ function App() {
 
   // Fetch user's cart product count
   const fetchUserAddToCart = async () => {
+    const token = localStorage.getItem('authToken');  
+
+    if (!token) {
+        console.error("No auth token found");
+        return;
+    }
     const dataResponse = await fetch(SummaryApi.addToCartProductCount.url, {
       method: SummaryApi.addToCartProductCount.method,
       credentials: 'include',
+      headers: {
+        'Authorization': `Bearer ${token}`,   // Send the token in Authorization header
+        'Content-Type': 'application/json'    // Specify content type
+    }
     });
 
     const dataApi = await dataResponse.json();

@@ -23,11 +23,18 @@ const CategoryProduct = () => {
     const [sortBy,setSortBy] = useState("")
 
     const fetchData = async()=>{
+      const token = localStorage.getItem('authToken');  
+
+      if (!token) {
+          console.error("No auth token found");
+          return;
+      }
       const response = await fetch(SummaryApi.filterProduct.url,{
         method : SummaryApi.filterProduct.method,
-        headers : {
-          "content-type" : "application/json"
-        },
+        headers: {
+          'Authorization': `Bearer ${token}`,   // Send the token in Authorization header
+          'Content-Type': 'application/json'    // Specify content type
+      },
         body : JSON.stringify({
           category : filterCategoryList
         })

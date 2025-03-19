@@ -21,11 +21,18 @@ const ChangeUserRole = ({
     }
 
     const updateUserRole = async() =>{
+        const token = localStorage.getItem('authToken');  
+
+        if (!token) {
+            console.error("No auth token found");
+            return;
+        }
         const fetchResponse = await fetch(SummaryApi.updateUser.url,{
             method : SummaryApi.updateUser.method,
             credentials : 'include',
-            headers : {
-                "content-type" : "application/json"
+            headers: {
+                'Authorization': `Bearer ${token}`,   // Send the token in Authorization header
+                'Content-Type': 'application/json'    // Specify content type
             },
             body : JSON.stringify({
                 userId : userId,
