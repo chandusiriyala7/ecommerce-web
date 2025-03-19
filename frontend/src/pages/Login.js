@@ -49,8 +49,7 @@ const Login = () => {
         if(dataApi.success){
           
             toast.success(dataApi.message)
-            // Dispatch user details to Redux
-            dispatch(setUserDetails(dataApi.user));  
+            localStorage.setItem('authToken', dataApi.data);
             navigate('/')
             fetchUserDetails()
             fetchUserAddToCart()

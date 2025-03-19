@@ -1,9 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
-import { Outlet } from 'react-router-dom';
+import { Outlet , useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer , toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useEffect, useState } from 'react';
 import SummaryApi from './common';
@@ -16,19 +16,42 @@ function App() {
   const [cartProductCount, setCartProductCount] = useState(0);
   const [customizedImages, setCustomizedImages] = useState({}); // Store customized images for products
 
-  // Fetch user details
+  const navigate = useNavigate();
+  // Fetch user details with token
   const fetchUserDetails = async () => {
-    const dataResponse = await fetch(SummaryApi.current_user.url, {
-      method: SummaryApi.current_user.method,
-      credentials: 'include',
-    });
+    const token = localStorage.getItem('authToken');  
 
-    const dataApi = await dataResponse.json();
+    if (!token) {
+        console.error("No auth token found");
+        return;
+    }
 
-    if (dataApi.success) {
-      dispatch(setUserDetails(dataApi.data));
+    try {
+        const dataResponse = await fetch(SummaryApi.current_user.url, {
+            method: SummaryApi.current_user.method,
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${token}`,   // Send the token in Authorization header
+                'Content-Type': 'application/json'    // Specify content type
+            }
+        });
+
+        const dataApi = await dataResponse.json();
+
+        if (dataApi.success) {
+            console.log(dataApi, 'log12');
+
+            navigate('/');
+            fetchUserDetails();        
+            fetchUserAddToCart();      
+        } else {
+            toast.error(dataApi.message || "Failed to fetch user details");
+        }
+    } catch (error) {
+        console.error("Error fetching user details:", error);
     }
   };
+
 
   // Fetch user's cart product count
   const fetchUserAddToCart = async () => {
