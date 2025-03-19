@@ -55,6 +55,7 @@ const Header = () => {
     }
   }
 console.log("User Details:", user)  // Debugging user details
+ 
 
   return (
     <header className='h-16 shadow-md bg-white fixed w-full z-40'>

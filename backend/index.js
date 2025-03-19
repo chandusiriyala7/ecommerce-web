@@ -26,7 +26,9 @@ const FRONTEND_URL = process.env.NODE_ENV === "development"
                 callback(new Error("Not allowed by CORS"));
             }
         },
-        credentials: true
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization']
     }));
     
 app.use(express.json())
