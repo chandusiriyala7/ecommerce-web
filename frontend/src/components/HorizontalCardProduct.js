@@ -1,15 +1,20 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState  } from 'react'
 import fetchCategoryWiseProduct from '../helpers/fetchCategoryWiseProduct'
 import displayINRCurrency from '../helpers/displayCurrency'
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6'
 import { Link } from 'react-router-dom'
 import addToCart from '../helpers/addToCart'
 import Context from '../context'
+import { ToastContainer , toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useDispatch, useSelector } from 'react-redux';
+
 
 const HorizontalCardProduct = ({category, heading}) => {
     const [data,setData] = useState([])
     const [loading,setLoading] = useState(true)
     const loadingList = new Array(13).fill(null)
+    const user = useSelector(state => state?.user?.user)
 
     const [scroll,setScroll] = useState(0)
     const scrollElement = useRef()
@@ -18,8 +23,13 @@ const HorizontalCardProduct = ({category, heading}) => {
     const { fetchUserAddToCart } = useContext(Context)
 
     const handleAddToCart = async(e,id)=>{
-       await addToCart(e,id)
-       fetchUserAddToCart()
+        if(user == null){
+            toast.error("Please Login To add Cart")
+        }else{
+        await addToCart(e,id)
+        fetchUserAddToCart()
+        }
+       
     }
 
     const fetchData = async() =>{

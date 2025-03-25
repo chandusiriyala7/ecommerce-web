@@ -14,7 +14,7 @@ const CategoryList = () => {
             const response = await fetch(SummaryApi.categoryProduct.url);
             const dataResponse = await response.json();
             setCategoryProduct(dataResponse.data.filter(product => product.category !== "OutOfStock")); // Filter products
-            console.log(dataResponse)
+            setLoading(false);
         } catch (error) {
             console.error("Error fetching category products:", error);
         }

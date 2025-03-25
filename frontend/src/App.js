@@ -39,7 +39,6 @@ function App() {
         const dataApi = await dataResponse.json();
 
         if (dataApi.success) {
-            console.log(dataApi, 'log12');
             dispatch(setUserDetails(dataApi.data));
              
         } else {
