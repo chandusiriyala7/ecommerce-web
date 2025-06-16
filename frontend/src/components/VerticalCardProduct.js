@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import fetchCategoryWiseProduct from '../helpers/fetchCategoryWiseProduct'
+import { Link } from 'react-router-dom'
 import displayINRCurrency from '../helpers/displayCurrency'
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6'
-import { Link } from 'react-router-dom'
 import addToCart from '../helpers/addToCart'
 import Context from '../context'
 import { ToastContainer , toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux';
+import scrollTop from '../helpers/scrollTop';
+import { fetchProductsByCategory } from '../services/productService';
 
 const VerticalCardProduct = ({category, heading}) => {
     const [data,setData] = useState([])
@@ -31,16 +32,18 @@ const VerticalCardProduct = ({category, heading}) => {
 
     const fetchData = async() =>{
         setLoading(true)
-        const categoryProduct = await fetchCategoryWiseProduct(category)
+        try {
+            const categoryProduct = await fetchProductsByCategory(category)
+            setData(categoryProduct)
+        } catch (error) {
+            console.error(`Error fetching products for ${category}:`, error)
+        }
         setLoading(false)
-
-        console.log("horizontal data",categoryProduct.data)
-        setData(categoryProduct?.data)
     }
 
     useEffect(()=>{
         fetchData()
-    },[])
+    },[category])
 
     const scrollRight = () =>{
         scrollElement.current.scrollLeft += 300

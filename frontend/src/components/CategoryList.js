@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import SummaryApi from '../common';
 import { Link } from 'react-router-dom';
+import { fetchCategories } from '../services/productService';
 
 const CategoryList = () => {
     const [categoryProduct, setCategoryProduct] = useState([]);
@@ -11,10 +11,8 @@ const CategoryList = () => {
     const fetchCategoryProduct = async () => {
         setLoading(true);
         try {
-            const response = await fetch(SummaryApi.categoryProduct.url);
-            const dataResponse = await response.json();
-            setCategoryProduct(dataResponse.data.filter(product => product.category !== "OutOfStock")); // Filter products
-            setLoading(false);
+            const data = await fetchCategories();
+            setCategoryProduct(data);
         } catch (error) {
             console.error("Error fetching category products:", error);
         }
