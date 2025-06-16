@@ -3,6 +3,7 @@ import SummaryApi from '../common'
 import Context from '../context'
 import displayINRCurrency from '../helpers/displayCurrency'
 import { MdDelete } from "react-icons/md";
+import { toast } from 'react-toastify';
 
 const Cart = () => {
     const [data,setData] = useState([])
@@ -10,6 +11,15 @@ const Cart = () => {
     const context = useContext(Context)
     const loadingCart = new Array(4).fill(null)
 
+    const [addressForm, setAddressForm] = useState({
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'India' // Default country
+    });
+    const [userAddresses, setUserAddresses] = useState([]);
+    const [showAddressForm, setShowAddressForm] = useState(false);
 
     const fetchData = async() =>{
         const token = localStorage.getItem('authToken');  
@@ -37,14 +47,81 @@ const Cart = () => {
 
     }
 
+    const fetchAddresses = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        try {
+            const response = await fetch(SummaryApi.getUserAddresses.url, {
+                method: SummaryApi.getUserAddresses.method,
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const responseData = await response.json();
+            if (responseData.success) {
+                setUserAddresses(responseData.data);
+            } else {
+                toast.error(responseData.message);
+            }
+        } catch (error) {
+            console.error("Error fetching addresses:", error);
+            toast.error("Failed to fetch addresses.");
+        }
+    };
+
+    const handleAddressFormChange = (e) => {
+        const { name, value } = e.target;
+        setAddressForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddAddress = async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            toast.error("Please login to add an address.");
+            return;
+        }
+        if (!addressForm.street || !addressForm.city || !addressForm.state || !addressForm.zipCode) {
+            toast.error("Please fill in all address fields.");
+            return;
+        }
+
+        try {
+            const response = await fetch(SummaryApi.addAddress.url, {
+                method: SummaryApi.addAddress.method,
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(addressForm)
+            });
+            const responseData = await response.json();
+            if (responseData.success) {
+                toast.success("Address added successfully!");
+                fetchAddresses(); // Refresh addresses
+                setAddressForm({ street: '', city: '', state: '', zipCode: '', country: 'India' }); // Clear form
+                setShowAddressForm(false);
+            } else {
+                toast.error(responseData.message);
+            }
+        } catch (error) {
+            console.error("Error adding address:", error);
+            toast.error("Failed to add address.");
+        }
+    };
+
     const handleLoading = async() =>{
+        setLoading(true)
         await fetchData()
+        await fetchAddresses(); // Fetch addresses after cart data
+        setLoading(false)
     }
 
     useEffect(()=>{
-        setLoading(true)
         handleLoading()
-         setLoading(false)
     },[])
 
 
@@ -179,29 +256,58 @@ const Cart = () => {
 
                 {/***summary  */}
                 <div className='mt-5 lg:mt-0 w-full max-w-sm'>
-                        {
-                            loading ? (
-                            <div className='h-36 bg-slate-200 border border-slate-300 animate-pulse'>
-                                
+                        <div className='h-36 bg-white'>
+                            <h2 className='text-white bg-black  px-4 py-1'>Summary</h2>
+                            <div className='flex items-center justify-between px-4 gap-2 font-medium text-lg text-slate-600'>
+                                <p>Quantity</p>
+                                <p>{totalQty}</p>
                             </div>
-                            ) : (
-                                <div className='h-36 bg-white'>
-                                    <h2 className='text-white bg-black  px-4 py-1'>Summary</h2>
-                                    <div className='flex items-center justify-between px-4 gap-2 font-medium text-lg text-slate-600'>
-                                        <p>Quantity</p>
-                                        <p>{totalQty}</p>
+
+                            <div className='flex items-center justify-between px-4 gap-2 font-medium text-lg text-slate-600'>
+                                <p>Total Price</p>
+                                <p>{displayINRCurrency(totalPrice)}</p>    
+                            </div>
+                        </div>
+
+                        {/* Address Section */}
+                        <div className='bg-white p-4 mt-4 rounded shadow'>
+                            <h2 className='text-xl font-semibold mb-3'>Delivery Address</h2>
+                            <button onClick={() => setShowAddressForm(prev => !prev)} className='bg-blue-500 text-white px-4 py-2 rounded mb-4'>
+                                {showAddressForm ? 'Hide Address Form' : 'Add New Address'}
+                            </button>
+
+                            {showAddressForm && (
+                                <form onSubmit={handleAddAddress} className='space-y-3'>
+                                    <input type='text' name='street' placeholder='Street Address' value={addressForm.street} onChange={handleAddressFormChange} className='w-full px-3 py-2 border rounded' required />
+                                    <input type='text' name='city' placeholder='City' value={addressForm.city} onChange={handleAddressFormChange} className='w-full px-3 py-2 border rounded' required />
+                                    <input type='text' name='state' placeholder='State' value={addressForm.state} onChange={handleAddressFormChange} className='w-full px-3 py-2 border rounded' required />
+                                    <input type='text' name='zipCode' placeholder='Zip Code' value={addressForm.zipCode} onChange={handleAddressFormChange} className='w-full px-3 py-2 border rounded' required />
+                                    <input type='text' name='country' placeholder='Country' value={addressForm.country} onChange={handleAddressFormChange} className='w-full px-3 py-2 border rounded' required />
+                                    <button type='submit' className='bg-green-500 text-white px-4 py-2 rounded w-full'>Save Address</button>
+                                </form>
+                            )}
+
+                            <h3 className='text-lg font-semibold mt-4 mb-2'>Your Saved Addresses</h3>
+                            {
+                                loading ? (
+                                    <p>Loading addresses...</p>
+                                ) : userAddresses.length === 0 ? (
+                                    <p>No addresses saved yet.</p>
+                                ) : (
+                                    <div className='space-y-2'>
+                                        {userAddresses.map((address, index) => (
+                                            <div key={index} className='border p-3 rounded-md bg-gray-50'>
+                                                <p>{address.street}, {address.city}, {address.state} - {address.zipCode}</p>
+                                                <p>{address.country}</p>
+                                            </div>
+                                        ))}
                                     </div>
+                                )
+                            }
+                        </div>
 
-                                    <div className='flex items-center justify-between px-4 gap-2 font-medium text-lg text-slate-600'>
-                                        <p>Total Price</p>
-                                        <p>{displayINRCurrency(totalPrice)}</p>    
-                                    </div>
+                        <button className='bg-blue-600 p-2 text-white w-full mt-2'>Payment</button>
 
-                                    <button className='bg-blue-600 p-2 text-white w-full mt-2'>Payment</button>
-
-                                </div>
-                            )
-                        }
                 </div>
         </div>
     </div>

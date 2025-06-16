@@ -80,6 +80,18 @@ const SummaryApi = {
     filterProduct : {
         url : `${backendDomin}/api/filter-product`,
         method : 'post'
+    },
+    addAddress : {
+        url : `${backendDomin}/api/add-address`,
+        method : 'post'
+    },
+    getUserAddresses : {
+        url : `${backendDomin}/api/get-user-addresses`,
+        method : 'get'
+    },
+    saveCustomizedProduct : {
+        url : `${backendDomin}/api/save-customized-product`,
+        method : 'post'
     }
 }
 

@@ -62,7 +62,7 @@ console.log("User Details:", user)  // Debugging user details
       <div className=' h-full container mx-auto flex items-center px-4 justify-between'>
             <div className=''>
                 <Link to={"/"}>
-                     <img src="./bullcroc-logo.jpg" alt ="bullcroc" className='w-[100px] '/>
+                     <img src="/bullcroc-logo.jpg" alt ="bullcroc" className='w-[100px] '/>
                 </Link>
             </div>
 
