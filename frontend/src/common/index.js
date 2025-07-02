@@ -3,7 +3,7 @@
 //     ? "http://localhost:8080"
 //     : "https://ecommerce-web-4jpy.onrender.com";
 
-const backendDomin ="http://localhost:8080"
+const backendDomin ="https://ecommerce-web-4jpy.onrender.com"
 const SummaryApi = {
     signUP : {
         url : `${backendDomin}/api/signup`,
