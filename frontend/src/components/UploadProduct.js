@@ -23,6 +23,8 @@ const UploadProduct = ({
   })
   const [openFullScreenImage,setOpenFullScreenImage] = useState(false)
   const [fullScreenImage,setFullScreenImage] = useState("")
+  const [backgrounds, setBackgrounds] = useState([]);
+  const [presets, setPresets] = useState([]);
 
 
   const handleOnChange = (e)=>{
@@ -63,6 +65,29 @@ const UploadProduct = ({
     
   }
 
+  // Handle background image upload
+  const handleUploadBackground = async(e) => {
+    const file = e.target.files[0];
+    const uploadImageCloudinary = await uploadImage(file);
+    setBackgrounds(prev => [...prev, uploadImageCloudinary.url]);
+  };
+
+  // Handle preset/logo image upload
+  const handleUploadPreset = async(e) => {
+    const file = e.target.files[0];
+    const uploadImageCloudinary = await uploadImage(file);
+    setPresets(prev => [...prev, uploadImageCloudinary.url]);
+  };
+
+  // Remove background
+  const handleDeleteBackground = (index) => {
+    setBackgrounds(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove preset
+  const handleDeletePreset = (index) => {
+    setPresets(prev => prev.filter((_, i) => i !== index));
+  };
 
   {/**upload product */}
   const handleSubmit = async(e) =>{
@@ -74,6 +99,11 @@ const UploadProduct = ({
         console.error("No auth token found");
         return;
     }
+    const productData = {
+      ...data,
+      backgrounds,
+      presets
+    };
     const response = await fetch(SummaryApi.uploadProduct.url,{
       method : SummaryApi.uploadProduct.method,
       credentials : 'include',
@@ -81,7 +111,7 @@ const UploadProduct = ({
         'Authorization': `Bearer ${token}`,   // Send the token in Authorization header
         'Content-Type': 'application/json'    // Specify content type
     },
-      body : JSON.stringify(data)
+      body : JSON.stringify(productData)
     })
 
     const responseData = await response.json()
@@ -230,9 +260,48 @@ const UploadProduct = ({
               >
               </textarea>
 
-
-
-
+              {/* Background Upload */}
+              <label htmlFor='backgroundUpload' className='mt-3'>Background Images :</label>
+              <label htmlFor='backgroundUpload'>
+                <div className='p-2 bg-slate-100 border rounded h-24 w-full flex justify-center items-center cursor-pointer'>
+                  <div className='text-slate-500 flex justify-center items-center flex-col gap-2'>
+                    <span className='text-2xl'><FaCloudUploadAlt/></span>
+                    <p className='text-xs'>Upload Background</p>
+                    <input type='file' id='backgroundUpload' className='hidden' onChange={handleUploadBackground}/>
+                  </div>
+                </div>
+              </label>
+              <div className='flex items-center gap-2 flex-wrap'>
+                {backgrounds.map((bg, idx) => (
+                  <div className='relative group' key={bg}>
+                    <img src={bg} alt={bg} width={60} height={60} className='bg-slate-100 border'/>
+                    <div className='absolute bottom-0 right-0 p-1 text-white bg-black rounded-full hidden group-hover:block cursor-pointer' onClick={()=>handleDeleteBackground(idx)}>
+                      <MdDelete/>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Preset/Logo Upload */}
+              <label htmlFor='presetUpload' className='mt-3'>Preset/Logo Images :</label>
+              <label htmlFor='presetUpload'>
+                <div className='p-2 bg-slate-100 border rounded h-24 w-full flex justify-center items-center cursor-pointer'>
+                  <div className='text-slate-500 flex justify-center items-center flex-col gap-2'>
+                    <span className='text-2xl'><FaCloudUploadAlt/></span>
+                    <p className='text-xs'>Upload Preset/Logo</p>
+                    <input type='file' id='presetUpload' className='hidden' onChange={handleUploadPreset}/>
+                  </div>
+                </div>
+              </label>
+              <div className='flex items-center gap-2 flex-wrap'>
+                {presets.map((preset, idx) => (
+                  <div className='relative group' key={preset}>
+                    <img src={preset} alt={preset} width={60} height={60} className='bg-slate-100 border'/>
+                    <div className='absolute bottom-0 right-0 p-1 text-white bg-black rounded-full hidden group-hover:block cursor-pointer' onClick={()=>handleDeletePreset(idx)}>
+                      <MdDelete/>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               <button className='px-3 py-2 bg-black  text-white mb-10 hover:bg-gray-700'>Upload Product</button>
           </form> 

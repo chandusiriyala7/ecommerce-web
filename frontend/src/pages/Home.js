@@ -27,7 +27,7 @@ const Home = () => {
     };
 
     return (
-        <div className="home">
+        <div className="home bg-background min-h-screen">
             {/* Existing Features */}
             <CategoryList />
             <BannerProduct />

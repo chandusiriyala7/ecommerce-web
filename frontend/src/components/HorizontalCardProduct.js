@@ -70,18 +70,18 @@ const HorizontalCardProduct = ({category, heading}) => {
            {   loading ? (
                 loadingList.map((product,index)=>{
                     return(
-                        <div className='w-full min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px] h-36 bg-white rounded-sm shadow flex'>
-                            <div className='bg-slate-200 h-full p-4 min-w-[120px] md:min-w-[145px] animate-pulse'>
+                        <div className='w-full min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px] h-36 bg-cardBg rounded-lg shadow-xl overflow-hidden transform transition-transform duration-300 hover:scale-105'>
+                            <div className='bg-slate-200 h-full p-4 min-w-[120px] md:min-w-[145px] animate-pulse flex items-center justify-center'>
 
                             </div>
                             <div className='p-4 grid w-full gap-2'>
-                                <h2 className='font-medium text-base md:text-lg text-ellipsis line-clamp-1 text-black bg-slate-200 animate-pulse p-1 rounded-full'></h2>
-                                <p className='capitalize text-slate-500 p-1 bg-slate-200 animate-pulse rounded-full'></p>
+                                <h2 className='font-bold text-base md:text-lg text-primary text-ellipsis line-clamp-1 bg-slate-200 animate-pulse p-1 rounded-full'></h2>
+                                <p className='capitalize text-secondary p-1 bg-slate-200 animate-pulse rounded-full'></p>
                                 <div className='flex gap-3 w-full'>
-                                    <p className='text-red-600 font-medium p-1 bg-slate-200 w-full animate-pulse rounded-full'></p>
-                                    <p className='text-slate-500 line-through p-1 bg-slate-200 w-full animate-pulse rounded-full'></p>
+                                    <p className='text-accent font-semibold text-lg p-1 bg-slate-200 w-full animate-pulse rounded-full'></p>
+                                    <p className='text-secondary line-through p-1 bg-slate-200 w-full animate-pulse rounded-full'></p>
                                 </div>
-                                <button className='text-sm  text-white px-3 py-0.5 rounded-full w-full bg-slate-200 animate-pulse'></button>
+                                <button className='text-sm text-white px-3 py-0.5 rounded-full w-full bg-accent animate-pulse'></button>
                             </div>
                         </div>
                     )
@@ -89,18 +89,18 @@ const HorizontalCardProduct = ({category, heading}) => {
            ) : (
             data.map((product,index)=>{
                 return(
-                    <Link to={"product/"+product?._id} className='w-full min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px] h-36 bg-white rounded-sm shadow flex'>
-                        <div className='bg-slate-200 h-full p-4 min-w-[120px] md:min-w-[145px]'>
-                            <img src={product.productImage[0]} className='object-scale-down h-full hover:scale-110 transition-all'/>
+                    <Link to={"product/"+product?._id} className='w-full min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px] h-36 bg-cardBg rounded-lg shadow-xl overflow-hidden transform transition-transform duration-300 hover:scale-105'>
+                        <div className='bg-cardBorder h-full p-4 min-w-[120px] md:min-w-[145px] flex items-center justify-center'>
+                            <img src={product.productImage[0]} className='object-scale-down h-full mix-blend-multiply transition-transform duration-300 hover:scale-110'/>
                         </div>
                         <div className='p-4 grid'>
-                            <h2 className='font-medium text-base md:text-lg text-ellipsis line-clamp-1 text-black'>{product?.productName}</h2>
-                            <p className='capitalize text-slate-500'>{product?.category}</p>
-                            <div className='flex gap-3'>
-                                <p className='text-red-600 font-medium'>{ displayINRCurrency(product?.sellingPrice) }</p>
-                                <p className='text-slate-500 line-through'>{ displayINRCurrency(product?.price)  }</p>
+                            <h2 className='font-bold text-base md:text-lg text-primary text-ellipsis line-clamp-1'>{product?.productName}</h2>
+                            <p className='capitalize text-secondary text-sm'>{product?.category}</p>
+                            <div className='flex items-baseline gap-3 mt-1'>
+                                <p className='text-accent font-semibold text-lg'>{ displayINRCurrency(product?.sellingPrice) }</p>
+                                <p className='text-secondary line-through text-sm'>{ displayINRCurrency(product?.price)  }</p>
                             </div>
-                            <button className='text-sm bg-black  hover:bg-gray-700 text-white px-3 py-0.5 rounded-full' onClick={(e)=>handleAddToCart(e,product?._id)}>Add to Cart</button>
+                            <button className='text-sm bg-primary hover:bg-accent text-white px-4 py-1 rounded-full transition-colors duration-300 mt-2' onClick={(e)=>handleAddToCart(e,product?._id)}>Add to Cart</button>
                         </div>
                     </Link>
                 )

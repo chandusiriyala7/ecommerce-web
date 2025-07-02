@@ -22,6 +22,8 @@ const updateAddToCartProduct = require('../controller/user/updateAddToCartProduc
 const deleteAddToCartProduct = require('../controller/user/deleteAddToCartProduct')
 const searchProduct = require('../controller/product/searchProduct')
 const filterProductController = require('../controller/product/filterProduct')
+const saveCustomizedProduct = require('../controller/product/saveCustomizedProduct')
+const getCustomizedProduct = require('../controller/product/getCustomizedProduct')
 
 
 
@@ -50,6 +52,10 @@ router.get("/countAddToCartProduct",authToken,countAddToCartProduct)
 router.get("/view-card-product",authToken,addToCartViewProduct)
 router.post("/update-cart-product",authToken,updateAddToCartProduct)
 router.post("/delete-cart-product",authToken,deleteAddToCartProduct)
+
+//customized product
+router.post("/save-customized-product", authToken, saveCustomizedProduct)
+router.get("/get-customized-product", authToken, getCustomizedProduct)
 
 
 

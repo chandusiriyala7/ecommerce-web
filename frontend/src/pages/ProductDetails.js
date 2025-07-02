@@ -259,8 +259,8 @@ const ProductDetails = () => {
                 <div className='grid grid-cols-2 gap-4 my-2'>
                   {/* Size Options */}
                   <div>
-                    <label htmlFor='sizeOptions' className='block text-sm font-medium text-gray-700'>Size Options</label>
-                    <select id='sizeOptions' name='sizeOptions' value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm'>
+                    <label htmlFor='sizeOptions' className='block text-sm font-medium text-primary mb-1'>Size Options</label>
+                    <select id='sizeOptions' name='sizeOptions' value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-cardBorder bg-cardBg rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm transition-all duration-300'>
                       <option value="">Select Size</option>
                       <option value="small">Small</option>
                       <option value="medium">Medium</option>
@@ -270,8 +270,8 @@ const ProductDetails = () => {
 
                   {/* Colour Options */}
                   <div>
-                    <label htmlFor='colourOptions' className='block text-sm font-medium text-gray-700'>Colour Options</label>
-                    <select id='colourOptions' name='colourOptions' value={selectedColour} onChange={(e) => setSelectedColour(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm'>
+                    <label htmlFor='colourOptions' className='block text-sm font-medium text-primary mb-1'>Colour Options</label>
+                    <select id='colourOptions' name='colourOptions' value={selectedColour} onChange={(e) => setSelectedColour(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-cardBorder bg-cardBg rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm transition-all duration-300'>
                       <option value="">Select Colour</option>
                       <option value="red">Red</option>
                       <option value="blue">Blue</option>
@@ -281,8 +281,8 @@ const ProductDetails = () => {
 
                   {/* Font Options */}
                   <div>
-                    <label htmlFor='fontOptions' className='block text-sm font-medium text-gray-700'>Font Options</label>
-                    <select id='fontOptions' name='fontOptions' value={selectedFont} onChange={(e) => setSelectedFont(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm'>
+                    <label htmlFor='fontOptions' className='block text-sm font-medium text-primary mb-1'>Font Options</label>
+                    <select id='fontOptions' name='fontOptions' value={selectedFont} onChange={(e) => setSelectedFont(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-cardBorder bg-cardBg rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm transition-all duration-300'>
                       <option value="">Select Font</option>
                       <option value="arial">Arial</option>
                       <option value="timesNewRoman">Times New Roman</option>
@@ -292,8 +292,8 @@ const ProductDetails = () => {
 
                   {/* Symbol Options */}
                   <div>
-                    <label htmlFor='symbolOptions' className='block text-sm font-medium text-gray-700'>Symbol Options</label>
-                    <select id='symbolOptions' name='symbolOptions' value={selectedSymbol} onChange={(e) => setSelectedSymbol(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm'>
+                    <label htmlFor='symbolOptions' className='block text-sm font-medium text-primary mb-1'>Symbol Options</label>
+                    <select id='symbolOptions' name='symbolOptions' value={selectedSymbol} onChange={(e) => setSelectedSymbol(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-cardBorder bg-cardBg rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm transition-all duration-300'>
                       <option value="">Select Symbol</option>
                       <option value="star">Star</option>
                       <option value="heart">Heart</option>
@@ -303,8 +303,8 @@ const ProductDetails = () => {
 
                   {/* Mourning Options */}
                   <div>
-                    <label htmlFor='mourningOptions' className='block text-sm font-medium text-gray-700'>Mourning Options</label>
-                    <select id='mourningOptions' name='mourningOptions' value={selectedMourningOption} onChange={(e) => setSelectedMourningOption(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm'>
+                    <label htmlFor='mourningOptions' className='block text-sm font-medium text-primary mb-1'>Mourning Options</label>
+                    <select id='mourningOptions' name='mourningOptions' value={selectedMourningOption} onChange={(e) => setSelectedMourningOption(e.target.value)} className='mt-1 block w-full py-2 px-3 border border-cardBorder bg-cardBg rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm transition-all duration-300'>
                       <option value="">Select Option</option>
                       <option value="yes">Yes</option>
                       <option value="no">No</option>
@@ -312,23 +312,23 @@ const ProductDetails = () => {
                   </div>
 
                   {/* Light Yes or No */}
-                  <div className='flex items-center gap-4'>
-                    <span className='text-sm font-medium text-gray-700'>Light:</span>
+                  <div className='flex items-center gap-4 py-2'>
+                    <span className='text-sm font-medium text-primary'>Light:</span>
                     <div className='flex items-center'>
-                      <input type='radio' id='lightYes' name='lightOption' value='yes' checked={lightOption === 'yes'} onChange={(e) => setLightOption(e.target.value)} className='focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300' />
-                      <label htmlFor='lightYes' className='ml-2 block text-sm text-gray-900'>Yes</label>
+                      <input type='radio' id='lightYes' name='lightOption' value='yes' checked={lightOption === 'yes'} onChange={(e) => setLightOption(e.target.value)} className='focus:ring-accent h-4 w-4 text-accent border-cardBorder transition-all duration-300' />
+                      <label htmlFor='lightYes' className='ml-2 block text-sm text-primary'>Yes</label>
                     </div>
                     <div className='flex items-center'>
-                      <input type='radio' id='lightNo' name='lightOption' value='no' checked={lightOption === 'no'} onChange={(e) => setLightOption(e.target.value)} className='focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300' />
-                      <label htmlFor='lightNo' className='ml-2 block text-sm text-gray-900'>No</label>
+                      <input type='radio' id='lightNo' name='lightOption' value='no' checked={lightOption === 'no'} onChange={(e) => setLightOption(e.target.value)} className='focus:ring-accent h-4 w-4 text-accent border-cardBorder transition-all duration-300' />
+                      <label htmlFor='lightNo' className='ml-2 block text-sm text-primary'>No</label>
                     </div>
                   </div>
                 </div>
 
                 <div className='flex items-center gap-3 my-2'>
-                  <button className='border-2 border-red-600 rounded px-3 py-1 min-w-[120px] text-red-600 font-medium hover:bg-gray-600 hover:text-white' onClick={(e)=>handleBuyProduct(e,data?._id)}>Buy</button>
-                  <button className='border-2 border-red-600 rounded px-3 py-1 min-w-[120px] font-medium text-white bg-black  hover:text-red-600 hover:bg-white' onClick={(e)=>handleAddToCart(e,data?._id, customizedProductImage)}>Add To Cart</button>
-                  <button className='border-2 border-blue-600 rounded px-3 py-1 min-w-[120px] font-medium text-white bg-blue-600 hover:bg-blue-700' onClick={() => navigate(`/customize/${data?._id}`)}>Customize</button>
+                  <button className='border-2 border-accent rounded px-4 py-2 min-w-[140px] text-accent font-semibold hover:bg-accent hover:text-white transition-all duration-300 shadow-md' onClick={(e)=>handleBuyProduct(e,data?._id)}>Buy Now</button>
+                  <button className='border-2 border-primary rounded px-4 py-2 min-w-[140px] font-semibold text-white bg-primary hover:bg-accent hover:text-white transition-all duration-300 shadow-md' onClick={(e)=>handleAddToCart(e,data?._id, customizedProductImage)}>Add To Cart</button>
+                  <button className='border-2 border-primary rounded px-4 py-2 min-w-[140px] font-semibold text-white bg-primary hover:bg-accent hover:text-white transition-all duration-300 shadow-md' onClick={() => navigate(`/customize/${data?._id}`, { state: { product: data } })}>Customize</button>
               </div>
 
               </div>

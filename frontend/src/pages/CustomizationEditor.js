@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { fabric } from 'fabric';
 import { 
   FaSave, 
@@ -8,8 +8,6 @@ import {
   FaSmile, 
   FaUndo, 
   FaRedo, 
-  FaPaintBrush, 
-  FaEraser, 
   FaPalette, 
   FaLayerGroup, 
   FaDownload, 
@@ -19,16 +17,17 @@ import {
 import { SketchPicker } from 'react-color';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import SummaryApi from '../common';
+import { useSelector } from 'react-redux';
 
 
 const CustomizationEditor = () => {
-  const { productId, category } = useParams();
+  const params = useParams();
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
   const [isCanvasReady, setIsCanvasReady] = useState(false);
   const [textColor, setTextColor] = useState('#000000');
-  const [brushColor, setBrushColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [activeTool, setActiveTool] = useState(null);
@@ -42,6 +41,13 @@ const CustomizationEditor = () => {
   const [textShadow, setTextShadow] = useState({ color: '#000000', blur: 0, offsetX: 0, offsetY: 0 });
   const [textStroke, setTextStroke] = useState({ color: '#000000', width: 0 });
   const [gradientText, setGradientText] = useState(false);
+  const [productBackgrounds, setProductBackgrounds] = useState([]);
+  const [productPresets, setProductPresets] = useState([]);
+  const [activeBackground, setActiveBackground] = useState(null);
+  const [productImages, setProductImages] = useState([]);
+  const [productName, setProductName] = useState('');
+  const user = useSelector(state => state?.user?.user);
+  const location = useLocation();
 
   // List of fonts for selection
   const fontOptions = [
@@ -83,6 +89,17 @@ const CustomizationEditor = () => {
     'Arial': 'Arial, sans-serif'
   };
 
+  // Predefined acrylic font colors
+  const acrylicFontColors = [
+    { name: 'White', value: '#FFFFFF' },
+    { name: 'Black', value: '#000000' },
+    { name: 'Gold', value: '#FFD700' },
+    { name: 'Silver', value: '#C0C0C0' },
+    { name: 'Red', value: '#FF0000' },
+    { name: 'Blue', value: '#0000FF' },
+    { name: 'Green', value: '#008000' },
+  ];
+
   // Initialize Fabric.js canvas
   const initializeCanvas = () => {
     const canvas = new fabric.Canvas(canvasRef.current, {
@@ -91,16 +108,16 @@ const CustomizationEditor = () => {
       backgroundColor: '#ffffff',
     });
     setCanvas(canvas);
-
-    // Load initial product image as background
-    fabric.Image.fromURL('https://via.placeholder.com/600', (img) => {
-      img.scaleToWidth(600);
-      img.scaleToHeight(600);
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-      setIsCanvasReady(true); // Mark canvas as ready
-    });
-
-    // Save initial state to history
+    if (activeBackground) {
+      fabric.Image.fromURL(activeBackground, (img) => {
+        img.scaleToWidth(600);
+        img.scaleToHeight(600);
+        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+        setIsCanvasReady(true);
+      });
+    } else {
+      setIsCanvasReady(true);
+    }
     saveState();
   };
 
@@ -196,28 +213,6 @@ const CustomizationEditor = () => {
       });
     };
     reader.readAsDataURL(file);
-  };
-
-  // Enable brush tool
-  const enableBrush = () => {
-    canvas.isDrawingMode = true;
-    canvas.freeDrawingBrush.color = brushColor;
-    canvas.freeDrawingBrush.width = 5;
-    setActiveTool('brush');
-  };
-
-  // Enable eraser tool
-  const enableEraser = () => {
-    canvas.isDrawingMode = true;
-    canvas.freeDrawingBrush.color = '#ffffff'; // White color acts as an eraser
-    canvas.freeDrawingBrush.width = 10;
-    setActiveTool('eraser');
-  };
-
-  // Disable drawing mode
-  const disableDrawingMode = () => {
-    canvas.isDrawingMode = false;
-    setActiveTool(null);
   };
 
   // Change font for active text object
@@ -370,25 +365,44 @@ const CustomizationEditor = () => {
   };
 
   // Save customized image
-  const saveCustomization = () => {
+  const saveCustomization = async () => {
     if (!canvas) {
       console.error('Canvas is not initialized.');
       return;
     }
-
     const dataURL = canvas.toDataURL({
       format: 'png',
       quality: 1,
     });
-
     if (!dataURL) {
       console.error('Failed to generate data URL.');
       return;
     }
-
-    localStorage.setItem(`customizedImage_${productId}`, dataURL);
-    toast.success('Customization saved!');
-    navigate(`/product/${productId}`);
+    // Save to backend
+    const token = localStorage.getItem('authToken');
+    if (!token || !user?._id) {
+      toast.error('User not logged in');
+      return;
+    }
+    const response = await fetch(SummaryApi.saveCustomizedProduct.url, {
+      method: SummaryApi.saveCustomizedProduct.method,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        productId: params.id,
+        userId: user._id,
+        image: dataURL,
+      }),
+    });
+    const result = await response.json();
+    if (result.success) {
+      toast.success('Customization saved!');
+      navigate(`/product/${params.id}`);
+    } else {
+      toast.error(result.message || 'Failed to save customization');
+    }
   };
 
   // Initialize canvas on component mount
@@ -407,14 +421,95 @@ const CustomizationEditor = () => {
 
   // Apply category-specific effects
   useEffect(() => {
-    if (category === 'neon-lights') {
+    if (params.category === 'neon-lights') {
       setNeonEffect(true);
-    } else if (category === 'metal-letters') {
+    } else if (params.category === 'metal-letters') {
       setMetalEffect(true);
-    } else if (category === 'nameplates') {
+    } else if (params.category === 'nameplates') {
       setThreeDEffect(true);
     }
-  }, [category]);
+  }, [params.category]);
+
+  // Fetch product backgrounds and presets on mount
+  useEffect(() => {
+    // If product details are passed via location.state, use them
+    if (location.state && location.state.product) {
+      const prod = location.state.product;
+      setProductName(prod.productName || '');
+      setProductImages(prod.productImage || []);
+      setProductBackgrounds(prod.backgrounds || prod.productImage || []);
+      setProductPresets(prod.presets || prod.productImage || []);
+      if ((prod.backgrounds && prod.backgrounds[0]) || (prod.productImage && prod.productImage[0])) {
+        setActiveBackground((prod.backgrounds && prod.backgrounds[0]) || prod.productImage[0]);
+      }
+      // Optionally, skip API fetch if all details are present
+      return;
+    }
+    async function fetchProductData() {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+      const response = await fetch(SummaryApi.productDetails.url, {
+        method: SummaryApi.productDetails.method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId: params.id }),
+      });
+      const data = await response.json();
+      setProductName(data?.data?.productName || '');
+      let bgs = data?.data?.backgrounds;
+      let presets = data?.data?.presets;
+      let imgs = data?.data?.productImage || [];
+      setProductImages(imgs);
+      if ((!bgs || bgs.length === 0) && imgs.length > 0) {
+        bgs = imgs;
+      }
+      if ((!presets || presets.length === 0) && imgs.length > 0) {
+        presets = imgs;
+      }
+      setProductBackgrounds(bgs || []);
+      setProductPresets(presets || []);
+      if (bgs && bgs[0]) setActiveBackground(bgs[0]);
+      // Debug logs
+      console.log('DEBUG backgrounds:', bgs);
+      console.log('DEBUG presets:', presets);
+      console.log('DEBUG productImages:', imgs);
+    }
+    fetchProductData();
+  }, [params.id, location.state]);
+
+  // Add handler to change background
+  const handleSelectBackground = (bgUrl) => {
+    setActiveBackground(bgUrl);
+    if (canvas) {
+      fabric.Image.fromURL(bgUrl, (img) => {
+        img.scaleToWidth(600);
+        img.scaleToHeight(600);
+        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+        saveState();
+      });
+    }
+  };
+
+  // Add handler to add preset/logo to canvas
+  const handleAddPreset = (presetUrl) => {
+    if (canvas) {
+      fabric.Image.fromURL(presetUrl, (img) => {
+        img.scaleToWidth(100);
+        img.scaleToHeight(100);
+        img.set({ left: 250, top: 250 });
+        canvas.add(img);
+        saveState();
+      });
+    }
+  };
+
+  // Replace color picker with dropdown for acrylic font colors
+  const changeTextColorDropdown = (color) => {
+    changeTextColor(color);
+  };
+
   const downloadCustomization = () => {
     if (!canvas) {
       console.error('Canvas is not initialized.');
@@ -428,7 +523,7 @@ const CustomizationEditor = () => {
 
     const link = document.createElement('a');
     link.href = dataURL;
-    link.download = `customized-image-${productId}.png`;
+    link.download = `customized-image-${params.id}.png`;
     link.click();
   };
 
@@ -462,7 +557,7 @@ const CustomizationEditor = () => {
 
     const link = document.createElement('a');
     link.href = dataURL;
-    link.download = `customized-image-small-${productId}.png`;
+    link.download = `customized-image-small-${params.id}.png`;
     link.click();
   };
 
@@ -471,20 +566,19 @@ const CustomizationEditor = () => {
       <ToastContainer />
       <div className='container mx-auto p-8'>
       <div className='flex items-center justify-between w-full mb-8'>
-      {/* Heading (Centered) */}
-      <h1 className='text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600 flex-grow text-center ml-14'>
-        Premium Customization Studio
-      </h1>
-
-      {/* Button (Right Aligned) */}
-      <button
-        className='px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
-        onClick={saveCustomization}
-        disabled={!isCanvasReady}
-      >
-        <FaSave size={18} /> Save
-      </button>
-    </div>
+        {/* Product Name (Top Left, highlighted) */}
+        <div className='flex items-center gap-4'>
+          <h1 className='text-2xl font-bold text-pink-600 bg-yellow-100 px-4 py-1 rounded shadow'>{productName || 'Product'}</h1>
+        </div>
+        {/* Save Button (Right Aligned) */}
+        <button
+          className='px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+          onClick={saveCustomization}
+          disabled={!isCanvasReady}
+        >
+          <FaSave size={18} /> Save
+        </button>
+      </div>
         <div className='flex flex-col lg:flex-row gap-8 justify-center'>
           {/* Left Panel - Tools */}
           <div className='w-full lg:w-64 flex flex-col gap-4'>
@@ -499,13 +593,11 @@ const CustomizationEditor = () => {
                   }`}
                   onClick={() => {
                     addText();
-                    disableDrawingMode();
                     setActiveTool('text');
                   }}
                 >
                   <FaFont /> Add Text
                 </button>
-                
                 <div>
                   <h3 className='text-sm font-medium mb-2 text-gray-300'>Pick Your Font</h3>
                   <select 
@@ -518,119 +610,45 @@ const CustomizationEditor = () => {
                     ))}
                   </select>
                 </div>
-                
-                <button
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all ${
-                    activeTool === 'brush' 
-                      ? 'bg-purple-600 text-white' 
-                      : 'bg-gray-700 hover:bg-gray-600'
-                  }`}
-                  onClick={enableBrush}
-                >
-                  <FaPaintBrush /> Brush
-                </button>
-                
-                <button
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all ${
-                    activeTool === 'eraser' 
-                      ? 'bg-purple-600 text-white' 
-                      : 'bg-gray-700 hover:bg-gray-600'
-                  }`}
-                  onClick={enableEraser}
-                >
-                  <FaEraser /> Eraser
-                </button>
-                
                 <div>
-                  <h3 className='text-sm font-medium mb-2 text-gray-300'>Select Your Colour</h3>
-                  <div className='flex items-center gap-2'>
-                    <div 
-                      className='w-10 h-10 rounded-lg border border-gray-600'
-                      style={{ backgroundColor: textColor }}
-                      onClick={() => setShowColorPicker(!showColorPicker)}
-                    ></div>
-                    <button
-                      className='flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-all'
-                      onClick={() => setShowColorPicker(!showColorPicker)}
-                    >
-                      <FaPalette /> Color Picker
-                    </button>
+                  <h3 className='text-sm font-medium mb-2 text-gray-300'>Font Color</h3>
+                  <select
+                    className='w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500'
+                    value={textColor}
+                    onChange={(e) => changeTextColorDropdown(e.target.value)}
+                  >
+                    {acrylicFontColors.map((color) => (
+                      <option key={color.value} value={color.value}>{color.name}</option>
+                    ))}
+                  </select>
+                </div>
+                {/* Pick and Place Presets/Logos */}
+                <div>
+                  <h3 className='text-sm font-medium mb-2 text-gray-300'>Pick & Place Logos/Decoratives</h3>
+                  <div className='flex flex-wrap gap-2'>
+                    {productPresets.length === 0 && productImages.length > 0 && productImages.map((img) => (
+                      <img
+                        key={img}
+                        src={img}
+                        alt='preset-fallback'
+                        className='w-12 h-12 rounded border cursor-pointer hover:scale-110 transition-transform'
+                        onClick={() => handleAddPreset(img)}
+                      />
+                    ))}
+                    {productPresets.length === 0 && productImages.length === 0 && (
+                      <span className='text-xs text-gray-400'>No logos or decoratives uploaded for this product.</span>
+                    )}
+                    {productPresets.map((preset) => (
+                      <img
+                        key={preset}
+                        src={preset}
+                        alt='preset'
+                        className='w-12 h-12 rounded border cursor-pointer hover:scale-110 transition-transform'
+                        onClick={() => handleAddPreset(preset)}
+                      />
+                    ))}
                   </div>
-                  {showColorPicker && (
-                    <div className='absolute z-10 mt-2'>
-                      <div 
-                        className='fixed inset-0'
-                        onClick={() => setShowColorPicker(false)}
-                      ></div>
-                      <div className='relative'>
-                        <SketchPicker
-                          color={textColor}
-                          onChangeComplete={(color) => {
-                            changeTextColor(color.hex);
-                            setBrushColor(color.hex);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
-
-                <div>
-                  <h3 className='text-sm font-medium mb-2 text-gray-300'>Text Shadow</h3>
-                  <input
-                    type='color'
-                    value={textShadow.color}
-                    onChange={(e) => changeTextShadow({ ...textShadow, color: e.target.value })}
-                    className='w-full h-10 rounded-lg cursor-pointer'
-                  />
-                  <input
-                    type='range'
-                    min='0'
-                    max='20'
-                    step='1'
-                    value={textShadow.blur}
-                    onChange={(e) => changeTextShadow({ ...textShadow, blur: parseInt(e.target.value) })}
-                    className='w-full'
-                  />
-                  <input
-                    type='range'
-                    min='-20'
-                    max='20'
-                    step='1'
-                    value={textShadow.offsetX}
-                    onChange={(e) => changeTextShadow({ ...textShadow, offsetX: parseInt(e.target.value) })}
-                    className='w-full'
-                  />
-                  <input
-                    type='range'
-                    min='-20'
-                    max='20'
-                    step='1'
-                    value={textShadow.offsetY}
-                    onChange={(e) => changeTextShadow({ ...textShadow, offsetY: parseInt(e.target.value) })}
-                    className='w-full'
-                  />
-                </div>
-
-                <div>
-                  <h3 className='text-sm font-medium mb-2 text-gray-300'>Text Stroke</h3>
-                  <input
-                    type='color'
-                    value={textStroke.color}
-                    onChange={(e) => changeTextStroke({ ...textStroke, color: e.target.value })}
-                    className='w-full h-10 rounded-lg cursor-pointer'
-                  />
-                  <input
-                    type='range'
-                    min='0'
-                    max='10'
-                    step='1'
-                    value={textStroke.width}
-                    onChange={(e) => changeTextStroke({ ...textStroke, width: parseInt(e.target.value) })}
-                    className='w-full'
-                  />
-                </div>
-            
               </div>
             </div>
           </div>
@@ -662,24 +680,32 @@ const CustomizationEditor = () => {
             </div>
           </div>
 
-          {/* Right Panel - Background */}
+          {/* Right Panel - Backgrounds */}
           <div className='w-full lg:w-64 flex flex-col gap-4'>
             <div className='bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700'>
-              <h2 className='text-xl font-semibold mb-4 text-purple-300'>Background</h2>
-              <div className='flex flex-col gap-3'>
-                <div>
-                  <h3 className='text-sm font-medium mb-2 text-gray-300'>Background Color</h3>
-                  <input
-                    type='color'
-                    value={backgroundColor}
-                    onChange={(e) => changeBackgroundColor(e.target.value)}
-                    className='w-full h-10 rounded-lg cursor-pointer'
+              <h2 className='text-xl font-semibold mb-4 text-purple-300'>Backgrounds</h2>
+              <div className='flex flex-wrap gap-2 mb-4'>
+                {productBackgrounds.length === 0 && productImages.length > 0 && productImages.map((img) => (
+                  <img
+                    key={img}
+                    src={img}
+                    alt='background-fallback'
+                    className={`w-16 h-16 rounded border cursor-pointer ${activeBackground === img ? 'ring-4 ring-accent' : ''}`}
+                    onClick={() => handleSelectBackground(img)}
                   />
-                </div>
-                <label className='flex items-center gap-2 px-4 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 transition-all cursor-pointer'>
-                  <FaImage /> Upload Image
-                  <input type='file' accept='image/*' className='hidden' onChange={handleImageUpload} />
-                </label>
+                ))}
+                {productBackgrounds.length === 0 && productImages.length === 0 && (
+                  <span className='text-xs text-gray-400'>No backgrounds uploaded for this product.</span>
+                )}
+                {productBackgrounds.map((bg) => (
+                  <img
+                    key={bg}
+                    src={bg}
+                    alt='background'
+                    className={`w-16 h-16 rounded border cursor-pointer ${activeBackground === bg ? 'ring-4 ring-accent' : ''}`}
+                    onClick={() => handleSelectBackground(bg)}
+                  />
+                ))}
               </div>
             </div>
             <div>

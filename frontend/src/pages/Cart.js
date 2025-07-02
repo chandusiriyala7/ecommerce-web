@@ -4,6 +4,8 @@ import Context from '../context'
 import displayINRCurrency from '../helpers/displayCurrency'
 import { MdDelete } from "react-icons/md";
 import { toast } from 'react-toastify';
+import fetchCustomizedImage from '../helpers/fetchCustomizedImage';
+import { useSelector } from 'react-redux';
 
 const Cart = () => {
     const [data,setData] = useState([])
@@ -20,6 +22,9 @@ const Cart = () => {
     });
     const [userAddresses, setUserAddresses] = useState([]);
     const [showAddressForm, setShowAddressForm] = useState(false);
+
+    const user = useSelector(state => state?.user?.user);
+    const [customizedImages, setCustomizedImages] = useState({});
 
     const fetchData = async() =>{
         const token = localStorage.getItem('authToken');  
@@ -124,6 +129,19 @@ const Cart = () => {
         handleLoading()
     },[])
 
+    // Fetch customized images for all cart products when data changes
+    useEffect(() => {
+        if (user?._id && data.length > 0) {
+            data.forEach(product => {
+                const pid = product?.productId?._id;
+                if (pid) {
+                    fetchCustomizedImage(user._id, pid).then(img => {
+                        setCustomizedImages(prev => ({ ...prev, [pid]: img }));
+                    });
+                }
+            });
+        }
+    }, [data, user]);
 
     const increaseQty = async(id,qty) =>{
         const response = await fetch(SummaryApi.updateCartProduct.url,{
@@ -225,8 +243,11 @@ const Cart = () => {
                           data.map((product,index)=>{
                            return(
                             <div key={product?._id+"Add To Cart Loading"} className='w-full bg-white h-32 my-2 border border-slate-300  rounded grid grid-cols-[128px,1fr]'>
-                                <div className='w-32 h-32 bg-slate-200'>
+                                <div className='w-32 h-32 bg-slate-200 flex flex-col items-center justify-center'>
                                     <img src={product?.productId?.productImage[0]} className='w-full h-full object-scale-down mix-blend-multiply' />
+                                    {customizedImages[product?.productId?._id] && (
+                                        <img src={customizedImages[product?.productId?._id]} alt='Customized' className='w-16 h-16 object-contain border-2 border-blue-500 mt-1' />
+                                    )}
                                 </div>
                                 <div className='px-4 py-2 relative'>
                                     {/**delete product */}
