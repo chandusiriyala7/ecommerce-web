@@ -11,6 +11,17 @@ const userSchema = new mongoose.Schema({
     password : String,
     profilePic : String,
     role : String,
+    addresses: [
+      {
+        street: String,
+        city: String,
+        state: String,
+        zipCode: String,
+        country: String,
+        label: String, // e.g., Home, Work
+      }
+    ],
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'product' }],
 },{
     timestamps : true
 })

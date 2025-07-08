@@ -81,13 +81,25 @@ const SummaryApi = {
         url : `${backendDomin}/api/filter-product`,
         method : 'post'
     },
-    addAddress : {
-        url : `${backendDomin}/api/add-address`,
-        method : 'post'
+    addAddress: {
+        url: `${backendDomin}/api/user/address`,
+        method: 'POST'
     },
-    getUserAddresses : {
-        url : `${backendDomin}/api/get-user-addresses`,
-        method : 'get'
+    getUserAddresses: {
+        url: `${backendDomin}/api/user/addresses`,
+        method: 'GET'
+    },
+    addToWishlist: {
+        url: `${backendDomin}/api/user/wishlist/add`,
+        method: 'POST'
+    },
+    removeFromWishlist: {
+        url: `${backendDomin}/api/user/wishlist/remove`,
+        method: 'POST'
+    },
+    getWishlist: {
+        url: `${backendDomin}/api/user/wishlist`,
+        method: 'GET'
     },
     saveCustomizedProduct : {
         url : `${backendDomin}/api/save-customized-product`,
@@ -96,6 +108,26 @@ const SummaryApi = {
     getCustomizedProduct : {
         url : `${backendDomin}/api/get-customized-product`,
         method : 'get'
+    },
+    placeOrder: {
+        url: `${backendDomin}/api/place-order`,
+        method: 'POST'
+    },
+    adminOrders: {
+        url: `${backendDomin}/api/admin/orders`,
+        method: 'GET'
+    },
+    adminOrderStatus: {
+        url: `${backendDomin}/api/admin/order-status`,
+        method: 'POST'
+    },
+    productReview: {
+        url: `${backendDomin}/api/product/review`,
+        method: 'POST'
+    },
+    getProductReviews: {
+        url: `${backendDomin}/api/product/reviews`,
+        method: 'GET'
     }
 }
 

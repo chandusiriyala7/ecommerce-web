@@ -13,6 +13,9 @@ import Cart from '../pages/Cart'
 import SearchProduct from '../pages/SearchProduct'
 import CustomizationEditor from '../pages/CustomizationEditor'
 import Profile from '../pages/Profile'
+import MyOrders from '../pages/MyOrders';
+import AdminAllOrders from '../pages/AdminAllOrders';
+import Wishlist from '../pages/Wishlist';
 
 const router = createBrowserRouter([
     {
@@ -56,6 +59,10 @@ const router = createBrowserRouter([
                 element : <SearchProduct/>
             },
             {
+                path : "wishlist",
+                element : <Wishlist/>
+            },
+            {
                 path : "admin-panel",
                 element : <AdminPanel/>,
                 children : [
@@ -66,12 +73,20 @@ const router = createBrowserRouter([
                     {
                         path : "all-products",
                         element : <AllProducts/>
+                    },
+                    {
+                        path : "all-orders",
+                        element : <AdminAllOrders/>
                     }
                 ]
             },
             {
                 path : "profile",
                 element : <Profile/>
+            },
+            {
+                path : "my-orders",
+                element : <MyOrders/>
             },
         ]
     }

@@ -1,41 +1,24 @@
-const userModel = require("../../models/userModel")
+const userModel = require('../../models/userModel');
 
-async function updateUser(req,res){
-    try{
-        const sessionUser = req.userId
-
-        const { userId , email, name, role, profilePic } = req.body
-
-        const payload = {
-            ...( email && { email : email}),
-            ...( name && { name : name}),
-            ...( role && { role : role}),
-            ...( profilePic && { profilePic: profilePic }),
+const updateUser = async (req, res) => {
+    try {
+        const { userId, name, email, profilePic, addresses } = req.body;
+        if (!userId) {
+            return res.status(400).json({ message: 'Missing userId', error: true, success: false });
         }
-
-        const user = await userModel.findById(sessionUser)
-
-        console.log("user.role",user.role)
-
-
-
-        const updateUser = await userModel.findByIdAndUpdate(userId,payload)
-
-        
-        res.json({
-            data : updateUser,
-            message : "User Updated",
-            success : true,
-            error : false
-        })
-    }catch(err){
-        res.status(400).json({
-            message : err.message || err,
-            error : true,
-            success : false
-        })
+        const updateFields = {};
+        if (name) updateFields.name = name;
+        if (email) updateFields.email = email;
+        if (profilePic) updateFields.profilePic = profilePic;
+        if (addresses) updateFields.addresses = addresses;
+        const user = await userModel.findByIdAndUpdate(userId, updateFields, { new: true });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found', error: true, success: false });
+        }
+        res.json({ data: user, success: true, error: false });
+    } catch (err) {
+        res.status(500).json({ message: err.message || err, error: true, success: false });
     }
-}
+};
 
-
-module.exports = updateUser
+module.exports = updateUser;

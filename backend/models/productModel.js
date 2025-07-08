@@ -9,7 +9,15 @@ const productSchema = mongoose.Schema({
     price : Number,
     sellingPrice : Number,
     backgrounds: [String],
-    presets: [String]
+    presets: [String],
+    reviews: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+        rating: { type: Number, required: true, min: 1, max: 5 },
+        comment: { type: String },
+        date: { type: Date, default: Date.now }
+      }
+    ]
 },{
     timestamps : true
 })

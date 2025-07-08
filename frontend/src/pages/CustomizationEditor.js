@@ -110,11 +110,11 @@ const CustomizationEditor = () => {
     setCanvas(canvas);
     if (activeBackground) {
       fabric.Image.fromURL(activeBackground, (img) => {
-        img.scaleToWidth(600);
-        img.scaleToHeight(600);
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+      img.scaleToWidth(600);
+      img.scaleToHeight(600);
+      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
         setIsCanvasReady(true);
-      });
+    });
     } else {
       setIsCanvasReady(true);
     }
@@ -398,7 +398,7 @@ const CustomizationEditor = () => {
     });
     const result = await response.json();
     if (result.success) {
-      toast.success('Customization saved!');
+    toast.success('Customization saved!');
       navigate(`/product/${params.id}`);
     } else {
       toast.error(result.message || 'Failed to save customization');
@@ -571,14 +571,14 @@ const CustomizationEditor = () => {
           <h1 className='text-2xl font-bold text-pink-600 bg-yellow-100 px-4 py-1 rounded shadow'>{productName || 'Product'}</h1>
         </div>
         {/* Save Button (Right Aligned) */}
-        <button
-          className='px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
-          onClick={saveCustomization}
-          disabled={!isCanvasReady}
-        >
-          <FaSave size={18} /> Save
-        </button>
-      </div>
+      <button
+        className='px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+        onClick={saveCustomization}
+        disabled={!isCanvasReady}
+      >
+        <FaSave size={18} /> Save
+      </button>
+    </div>
         <div className='flex flex-col lg:flex-row gap-8 justify-center'>
           {/* Left Panel - Tools */}
           <div className='w-full lg:w-64 flex flex-col gap-4'>
@@ -647,7 +647,7 @@ const CustomizationEditor = () => {
                         onClick={() => handleAddPreset(preset)}
                       />
                     ))}
-                  </div>
+                </div>
                 </div>
               </div>
             </div>

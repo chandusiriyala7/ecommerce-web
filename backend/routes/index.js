@@ -24,7 +24,20 @@ const searchProduct = require('../controller/product/searchProduct')
 const filterProductController = require('../controller/product/filterProduct')
 const saveCustomizedProduct = require('../controller/product/saveCustomizedProduct')
 const getCustomizedProduct = require('../controller/product/getCustomizedProduct')
-
+const placeOrder = require('../controller/user/placeOrder');
+const getUserOrders = require('../controller/user/getUserOrders');
+const getAllOrders = require('../controller/admin/getAllOrders');
+const updateOrderStatus = require('../controller/admin/updateOrderStatus');
+const permission = require('../helpers/permission');
+const getUserAddresses = require('../controller/user/getUserAddresses');
+const addUserAddress = require('../controller/user/addUserAddress');
+const updateUserAddress = require('../controller/user/updateUserAddress');
+const deleteUserAddress = require('../controller/user/deleteUserAddress');
+const addToWishlist = require('../controller/user/addToWishlist');
+const removeFromWishlist = require('../controller/user/removeFromWishlist');
+const getWishlist = require('../controller/user/getWishlist');
+const addReview = require('../controller/product/addReview');
+const getReviews = require('../controller/product/getReviews');
 
 
 router.post("/signup",userSignUpController)
@@ -56,6 +69,30 @@ router.post("/delete-cart-product",authToken,deleteAddToCartProduct)
 //customized product
 router.post("/save-customized-product", authToken, saveCustomizedProduct)
 router.get("/get-customized-product", authToken, getCustomizedProduct)
+
+// Order routes
+router.post('/place-order', placeOrder);
+router.get('/user-orders', getUserOrders);
+
+// Admin order routes
+router.get('/admin/orders', authToken, getAllOrders);
+router.post('/admin/order-status', authToken, updateOrderStatus);
+
+// User address routes
+ 
+router.get('/user/addresses', authToken, getUserAddresses);
+router.post('/user/address', authToken, addUserAddress);
+router.put('/user/address', authToken, updateUserAddress);
+router.delete('/user/address', authToken, deleteUserAddress);
+
+// Wishlist routes
+router.post('/user/wishlist/add', authToken, addToWishlist);
+router.post('/user/wishlist/remove', authToken, removeFromWishlist);
+router.get('/user/wishlist', authToken, getWishlist);
+
+// Product reviews routes
+router.post('/product/review', authToken, addReview);
+router.get('/product/reviews', getReviews);
 
 
 

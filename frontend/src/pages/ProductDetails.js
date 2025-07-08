@@ -3,6 +3,7 @@ import  { useNavigate, useParams } from 'react-router-dom'
 import SummaryApi from '../common'
 import { FaStar } from "react-icons/fa";
 import { FaStarHalf } from "react-icons/fa";
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import displayINRCurrency from '../helpers/displayCurrency';
 import VerticalCardProduct from '../components/VerticalCardProduct';
 import CategroyWiseProductDisplay from '../components/CategoryWiseProductDisplay';
@@ -46,6 +47,11 @@ const ProductDetails = () => {
   const [selectedSymbol, setSelectedSymbol] = useState("");
   const [selectedMourningOption, setSelectedMourningOption] = useState("");
   const [lightOption, setLightOption] = useState("");
+  const [wishlist, setWishlist] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewLoading, setReviewLoading] = useState(true);
+  const [userReview, setUserReview] = useState({ rating: 0, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const fetchProductDetails = async()=>{
     setLoading(true)
@@ -83,6 +89,48 @@ const ProductDetails = () => {
       setActiveImage(savedCustomizedImage); // Set customized image as active by default if it exists
     }
   },[params])
+
+  useEffect(() => {
+    // Track recently viewed products
+    if (params?.id) {
+      let viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      viewed = viewed.filter(pid => pid !== params.id);
+      viewed.unshift(params.id);
+      if (viewed.length > 12) viewed = viewed.slice(0, 12);
+      localStorage.setItem('recentlyViewed', JSON.stringify(viewed));
+    }
+  }, [params]);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!user?._id) return;
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(SummaryApi.getWishlist.url, {
+        method: SummaryApi.getWishlist.method,
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setWishlist(data.data.map(p => p._id));
+    };
+    fetchWishlist();
+  }, [user]);
+
+  // Fetch reviews
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setReviewLoading(true);
+      const res = await fetch(`${SummaryApi.getProductReviews.url}?productId=${params.id}`);
+      const data = await res.json();
+      if (data.success) setReviews(data.data);
+      setReviewLoading(false);
+      // If user has already reviewed, set form state
+      if (user?._id) {
+        const existing = data.data.find(r => r.user?._id === user._id);
+        if (existing) setUserReview({ rating: existing.rating, comment: existing.comment });
+      }
+    };
+    fetchReviews();
+  }, [params.id, user]);
 
   const handleMouseEnterProduct = (imageURL)=>{
     setActiveImage(imageURL)
@@ -126,6 +174,60 @@ const ProductDetails = () => {
     fetchUserAddToCart()
     navigate("/cart")
   }
+
+  const handleWishlistToggle = async (productId) => {
+    if (!user?._id) {
+      toast.error('Please login to use wishlist');
+      return;
+    }
+    const token = localStorage.getItem('authToken');
+    if (wishlist.includes(productId)) {
+      await fetch(SummaryApi.removeFromWishlist.url, {
+        method: SummaryApi.removeFromWishlist.method,
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user._id, productId })
+      });
+      setWishlist(wishlist.filter(id => id !== productId));
+    } else {
+      await fetch(SummaryApi.addToWishlist.url, {
+        method: SummaryApi.addToWishlist.method,
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user._id, productId })
+      });
+      setWishlist([...wishlist, productId]);
+    }
+  };
+
+  // Submit review
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!user?._id) {
+      toast.error('Please login to review');
+      return;
+    }
+    if (!userReview.rating) {
+      toast.error('Please select a rating');
+      return;
+    }
+    setSubmittingReview(true);
+    const token = localStorage.getItem('authToken');
+    const res = await fetch(SummaryApi.productReview.url, {
+      method: SummaryApi.productReview.method,
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: params.id, ...userReview })
+    });
+    const data = await res.json();
+    setSubmittingReview(false);
+    if (data.success) {
+      setReviews(data.data);
+      toast.success('Review submitted!');
+    } else {
+      toast.error(data.message || 'Failed to submit review');
+    }
+  };
+
+  // Calculate average rating
+  const avgRating = reviews.length ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : null;
 
   return (
     <div className='container mx-auto p-4'>
@@ -329,6 +431,71 @@ const ProductDetails = () => {
                   <button className='border-2 border-accent rounded px-4 py-2 min-w-[140px] text-accent font-semibold hover:bg-accent hover:text-white transition-all duration-300 shadow-md' onClick={(e)=>handleBuyProduct(e,data?._id)}>Buy Now</button>
                   <button className='border-2 border-primary rounded px-4 py-2 min-w-[140px] font-semibold text-white bg-primary hover:bg-accent hover:text-white transition-all duration-300 shadow-md' onClick={(e)=>handleAddToCart(e,data?._id, customizedProductImage)}>Add To Cart</button>
                   <button className='border-2 border-primary rounded px-4 py-2 min-w-[140px] font-semibold text-white bg-primary hover:bg-accent hover:text-white transition-all duration-300 shadow-md' onClick={() => navigate(`/customize/${data?._id}`, { state: { product: data } })}>Customize</button>
+                  <div className='flex items-center gap-4 mb-2'>
+                    <button className='text-2xl' onClick={() => handleWishlistToggle(params.id)}>
+                      {wishlist.includes(params.id) ? <FaHeart className='text-red-500' /> : <FaRegHeart className='text-gray-400' />}
+                    </button>
+                    <span>Add to Wishlist</span>
+                  </div>
+              </div>
+
+              {/* Reviews & Ratings Section */}
+              <div className='mt-8 bg-white rounded shadow p-4'>
+                <h3 className='text-xl font-bold mb-2'>Reviews & Ratings</h3>
+                <div className='flex items-center gap-2 mb-2'>
+                  <span className='text-2xl text-yellow-500'>{avgRating ? avgRating : '--'}</span>
+                  <div className='flex'>
+                    {[1,2,3,4,5].map(i => (
+                      <FaStar key={i} className={avgRating && avgRating >= i ? 'text-yellow-400' : 'text-gray-300'} />
+                    ))}
+                  </div>
+                  <span className='text-gray-600 ml-2'>({reviews.length} review{reviews.length !== 1 ? 's' : ''})</span>
+                </div>
+                {/* Review Form */}
+                {user?._id && (
+                  <form onSubmit={handleReviewSubmit} className='mb-4'>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <span className='font-medium'>Your Rating:</span>
+                      {[1,2,3,4,5].map(i => (
+                        <button type='button' key={i} onClick={() => setUserReview(r => ({ ...r, rating: i }))}>
+                          <FaStar className={userReview.rating >= i ? 'text-yellow-400' : 'text-gray-300'} />
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      className='w-full border rounded px-3 py-2 mb-2'
+                      rows={2}
+                      placeholder='Write your review...'
+                      value={userReview.comment}
+                      onChange={e => setUserReview(r => ({ ...r, comment: e.target.value }))}
+                    />
+                    <button type='submit' className='bg-blue-600 text-white px-4 py-2 rounded' disabled={submittingReview}>{submittingReview ? 'Submitting...' : 'Submit Review'}</button>
+                  </form>
+                )}
+                {/* Reviews List */}
+                {reviewLoading ? (
+                  <div>Loading reviews...</div>
+                ) : reviews.length === 0 ? (
+                  <div className='text-gray-500'>No reviews yet.</div>
+                ) : (
+                  <div className='space-y-4'>
+                    {reviews.map((r, idx) => (
+                      <div key={idx} className='border-b pb-2'>
+                        <div className='flex items-center gap-2 mb-1'>
+                          {r.user?.profilePic ? <img src={r.user.profilePic} alt={r.user.name} className='w-8 h-8 rounded-full' /> : <div className='w-8 h-8 rounded-full bg-gray-300'></div>}
+                          <span className='font-semibold'>{r.user?.name || 'User'}</span>
+                          <div className='flex ml-2'>
+                            {[1,2,3,4,5].map(i => (
+                              <FaStar key={i} className={r.rating >= i ? 'text-yellow-400' : 'text-gray-300'} />
+                            ))}
+                          </div>
+                          <span className='text-xs text-gray-500 ml-2'>{new Date(r.date).toLocaleDateString()}</span>
+                        </div>
+                        <div className='ml-10 text-gray-800'>{r.comment}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               </div>

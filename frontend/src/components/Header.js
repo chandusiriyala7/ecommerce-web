@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect, useRef } from 'react'
 import Logo from './Logo'
 import { GrSearch } from "react-icons/gr";
 import { FaRegCircleUser, FaCamera } from "react-icons/fa6";
@@ -22,6 +22,9 @@ const Header = () => {
   const URLSearch = new URLSearchParams(searchInput?.search)
   const searchQuery = URLSearch.getAll("q")
   const [search,setSearch] = useState(searchQuery)
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef();
 
 
   const handleLogout = async() => {
@@ -45,9 +48,18 @@ const Header = () => {
 
   }
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     const { value } = e.target;
     setSearch(value);
+    if (value.length > 1) {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(value)}`);
+      const data = await res.json();
+      if (data.success) setSuggestions(data.data.slice(0, 6));
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
   };
 
   const handleSearchSubmit = (e) => {
@@ -58,6 +70,17 @@ const Header = () => {
       navigate('/search');
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (inputRef.current && !inputRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
 console.log("User Details:", user)  // Debugging user details
  
 
@@ -70,8 +93,8 @@ console.log("User Details:", user)  // Debugging user details
                 </Link>
             </div>
 
-            <div className='hidden lg:flex items-center w-full justify-between max-w-md border border-cardBorder rounded-full focus-within:shadow-md overflow-hidden pl-4' onSubmit={handleSearchSubmit}>
-                <input type='text' placeholder='Search for products...' className='w-full outline-none py-2 bg-cardBg text-primary placeholder-secondary' onChange={handleSearch} value={search}/>
+            <div className='hidden lg:flex items-center w-full justify-between max-w-md border border-cardBorder rounded-full focus-within:shadow-md overflow-hidden pl-4 relative' onSubmit={handleSearchSubmit} ref={inputRef}>
+                <input type='text' placeholder='Search for products...' className='w-full outline-none py-2 bg-cardBg text-primary placeholder-secondary' onChange={handleSearch} value={search} onFocus={() => setShowSuggestions(suggestions.length > 0)} />
                 <button
                   type='submit'
                   className='text-xl min-w-[44px] h-full bg-primary flex items-center justify-center rounded-r-full text-white cursor-pointer hover:bg-accent transition-colors duration-300 px-3'
@@ -79,6 +102,19 @@ console.log("User Details:", user)  // Debugging user details
                 >
                   <FaSearch />
                 </button>
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className='absolute top-full left-0 w-full bg-white border border-gray-200 rounded-b shadow-lg z-50 max-h-72 overflow-y-auto'>
+                    {suggestions.map(product => (
+                      <div key={product._id} className='flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer' onClick={() => { navigate(`/product/${product._id}`); setShowSuggestions(false); }}>
+                        <img src={product.productImage?.[0]} alt={product.productName} className='w-10 h-10 object-contain' />
+                        <div>
+                          <div className='font-medium'>{product.productName}</div>
+                          <div className='text-sm text-gray-500'>{product.category}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
             </div>
 
 
@@ -112,6 +148,12 @@ console.log("User Details:", user)  // Debugging user details
                           }
                           <Link to={'/profile'} className='whitespace-nowrap flex items-center gap-2 hover:bg-background text-primary p-2 rounded block transition-colors duration-300' onClick={()=>setMenuDisplay(preve => !preve)}>
                             <FaCamera className='text-lg' /> Edit Profile
+                          </Link>
+                          <Link to={'/wishlist'} className='whitespace-nowrap flex items-center gap-2 hover:bg-background text-primary p-2 rounded block transition-colors duration-300' onClick={()=>setMenuDisplay(preve => !preve)}>
+                            <span className='text-lg'>❤️</span> Wishlist
+                          </Link>
+                          <Link to={'/my-orders'} className='whitespace-nowrap flex items-center gap-2 hover:bg-background text-primary p-2 rounded block transition-colors duration-300' onClick={()=>setMenuDisplay(preve => !preve)}>
+                            <span className='text-lg'>📦</span> My Orders
                           </Link>
                         </nav>
                       </div>
